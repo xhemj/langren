@@ -1,0 +1,33 @@
+[
+  {
+    "avatar": "https://staticoss.xhemj.work/langren.xhemj.com/character/pingmin.jpg",
+    "name": "平民",
+    "role": "good"
+  },
+  {
+    "avatar": "https://staticoss.xhemj.work/langren.xhemj.com/character/langren.jpg",
+    "name": "狼人",
+    "role": "bad"
+  },
+  {
+    "avatar": "https://staticoss.xhemj.work/langren.xhemj.com/character/yuyanjia.jpg",
+    "name": "预言家",
+    "role": "good"
+  },
+  {
+    "avatar": "https://staticoss.xhemj.work/langren.xhemj.com/character/nvwu.jpg",
+    "name": "女巫",
+    "role": "good"
+  },
+
+  {
+    "avatar": "https://staticoss.xhemj.work/langren.xhemj.com/character/lieren.jpg",
+    "name": "猎人",
+    "role": "good"
+  },
+  {
+    "avatar": "https://staticoss.xhemj.work/langren.xhemj.com/character/qiubite.jpg",
+    "name": "丘比特",
+    "role": "good"
+  }
+]

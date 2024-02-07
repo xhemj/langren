@@ -1,0 +1,14 @@
+{
+  "wolf_open": "天黑请闭眼，狼人请睁眼，狼人请确认同伴。",
+  "wolf_kill": "狼人请确认目标",
+  "wolf_close_eyes": "狼人请闭眼",
+  "witch_open": "女巫请睁眼",
+  "witch_save": "女巫，昨夜死的是他。女巫，请问是否使用解药？",
+  "witch_kill": "请问，是否使用毒药？",
+  "witch_close": "女巫请闭眼",
+  "seer_open": "预言家请睁眼",
+  "seer_see": "预言家请验人",
+  "seer_result": "预言家，你昨夜验的人是……",
+  "seer_close": "预言家请闭眼",
+  "next_day": "天亮了"
+}
