@@ -88,7 +88,7 @@ function initAssignment() {
     }
   }
   assignList.value = shuffle(assignList.value);
-  console.log("====分配角色", assignList.value);
+  // console.log("====分配角色", assignList.value);
   isStartAssignment.value = true;
 }
 
@@ -136,7 +136,7 @@ function shuffle(arr) {
 }
 
 onMounted(() => {
-  if (!game.characterList || !game.playerCount) {
+  if (Object.keys(game.characterList).length === 0) {
     router.replace({ name: "settings" });
   }
   initAssignment();

@@ -141,7 +141,7 @@ const onStartGame = () => {
     Object.entries(game.characterList).filter(([, value]) => value > 0)
   );
 
-  console.log("====开始游戏");
+  // console.log("====开始游戏");
   router.push({ name: "assign" });
 };
 </script>

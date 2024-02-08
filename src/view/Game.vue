@@ -111,13 +111,12 @@
 </template>
 
 <script setup>
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useGameStore } from "../stores/game";
 import useAudioController from "../utils/AudioController";
 import CharacterCard from "../components/CharacterCard.vue";
-import characters from "../assets/data/characters.json";
 import plots from "../assets/data/plots.json";
-import { onMounted, ref } from "vue";
 
 const router = useRouter();
 const game = useGameStore();
@@ -153,6 +152,17 @@ let plotAllCharacterHighlightFunction = null;
 let plotAllCharacterButtonDisabledFunction = null;
 let plotSingleCharacterHighlightFunction = null;
 
+// 判断游戏结果
+const goodCount = computed(() => {
+  return gameCharacter.value.filter(
+    (item) => item.role === "good" && !item.isDead
+  ).length;
+});
+const badCount = computed(() => {
+  return gameCharacter.value.filter(
+    (item) => item.role === "bad" && !item.isDead
+  ).length;
+});
 // 游戏音频
 const gameAudioList = [];
 for (let key in plots) {
@@ -175,7 +185,7 @@ async function startGame() {
 
 const UNKNOWN_AVATAR =
   "https://staticoss.xhemj.work/langren.xhemj.com/character/unknown.jpg";
-const TIPS_DEFAULT = "本轮无需操作";
+const TIPS_DEFAULT = "本轮无需额外操作";
 
 class Plots {
   constructor() {
@@ -369,11 +379,11 @@ class Plots {
     if (!plot.witchIsUsedMedicine && !plot.witchIsUsedPoison) {
       plot.setTips("当前还剩一瓶解药和一瓶毒药");
     } else if (plot.witchIsUsedMedicine && !plot.witchIsUsedPoison) {
-      plot.setTips("当前还剩一瓶毒药,已无解药");
+      plot.setTips("当前还剩一瓶毒药，已无解药");
     } else if (!plot.witchIsUsedMedicine && plot.witchIsUsedPoison) {
-      plot.setTips("当前还剩一瓶解药,已无毒药");
+      plot.setTips("当前还剩一瓶解药，已无毒药");
     } else {
-      plot.setTips("本轮没有药水了,请点击按钮以继续");
+      plot.setTips("本轮没有药水了，请点击按钮以继续");
     }
   }
 
@@ -509,7 +519,6 @@ class Plots {
         plot.setActionButtonText("已使用解药");
         plot.setContinueButtonText("继续");
         plot.witchIsUsedMedicine = true;
-        this.checkWitchMedicine();
         gameCharacter.value[plot.wolfKilledCharacterIndex].isKilled = false;
         plot.wolfKilledCharacter = null;
         plot.wolfKilledCharacterIndex = null;
@@ -565,7 +574,6 @@ class Plots {
         // character.isKilled = true;
         isSelect.value = true;
         plot.witchIsUsedPoison = true;
-        plot.checkWitchMedicine();
         plot.setContinueButtonText("继续");
       });
       plot.setContinueButtonFunction(() => {
@@ -681,7 +689,7 @@ class Plots {
 
   async next_day() {
     plot.playPlotAudio("next_day");
-    plot.setTips("本轮已结束,请待全部玩家发言完毕后点击按钮继续");
+    plot.setTips("本轮已结束，请待全部玩家发言完毕后点击按钮继续");
     plot.setContinueButtonText("前往投票");
     plot.hideSingleCharacter();
     plot.showAllCharacter();
@@ -714,7 +722,7 @@ class Plots {
   async vote() {
     // 投票
     plot.setActionButtonText("投票");
-    plot.setContinueButtonText("不投票,继续下一轮");
+    plot.setContinueButtonText("不投票，继续下一轮");
     plot.setTips("请选择要投出的角色");
     plotText.value = "请投票";
 
@@ -743,18 +751,49 @@ class Plots {
       }
       character.isVoted = true;
       isSelect.value = true;
-      plot.setContinueButtonText("开始下一轮");
+      plot.setContinueButtonText("确定");
     });
 
     plot.setContinueButtonFunction(() => {
-      plot.resetState();
       plot.day++;
-      if (!_isDev) {
-        plot.wolf_open();
-      } else {
-        plot.wolf_kill();
-      }
+      plot.judge();
     });
+
+    // 若全部坏角色都已死亡,则直接跳过投票环节
+    if (badCount.value === 0) {
+      plot.judge();
+    }
+  }
+
+  async judge() {
+    plot.handleCharacterState();
+
+    plot.resetState();
+
+    if (goodCount.value === 0 || badCount.value >= goodCount.value) {
+      plotText.value = "好人阵营失败";
+      plot.setContinueButtonText("再来一轮");
+      plot.setContinueButtonFunction(() => {
+        router.push({ name: "settings" });
+      });
+    } else if (badCount.value === 0) {
+      plotText.value = "好人阵营胜利";
+      plot.setContinueButtonText("再来一轮");
+      plot.setContinueButtonFunction(() => {
+        router.push({ name: "settings" });
+      });
+    } else {
+      plotText.value = "游戏继续";
+      plot.setTips("请点击按钮继续");
+      plot.setContinueButtonText("开始下一轮");
+      plot.setContinueButtonFunction(() => {
+        if (!_isDev) {
+          plot.wolf_open();
+        } else {
+          plot.wolf_kill();
+        }
+      });
+    }
   }
 }
 
@@ -769,6 +808,10 @@ async function wait(time) {
 }
 
 onMounted(() => {
+  if (Object.keys(game.characterList).length === 0) {
+    router.replace({ name: "settings" });
+  }
+
   handleGameLoop();
 
   window.plot = plot;
