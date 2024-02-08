@@ -22,6 +22,7 @@
       <p class="font-medium mt-4 text-lg">人</p>
     </div>
     <p class="font-medium mt-4 text-lg">请选择角色与数量：</p>
+
     <div class="flex w-full flex-row flex-wrap mt-2">
       <div
         v-for="character in characters"
@@ -61,7 +62,6 @@
         </characterCard>
       </div>
     </div>
-
     <div class="flex justify-center flex-col items-center mt-8">
       <p
         class="font-medium mb-2 text-lg"

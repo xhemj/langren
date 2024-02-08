@@ -19,6 +19,7 @@
       </n-button>
     </div>
 
+    <!-- 剧情文字 -->
     <div
       v-if="isStartGame"
       class="flex items-center flex-col justify-end"
@@ -33,6 +34,7 @@
       <p v-show="plotTips" class="font-medium text-xl">{{ plotTips }}</p>
     </div>
 
+    <!-- 展示全部角色卡片 -->
     <div
       v-show="isShowAllCharacter"
       class="flex flex-row flex-wrap w-full mt-8"
@@ -54,24 +56,36 @@
           :highlight-color="plotAllCharacterHighlightColor"
         >
           <template v-if="plotActionButtonFunction" #action>
-            <n-button
-              type="primary"
-              size="large"
-              strong
-              secondary
-              @click="plotActionButtonFunction(character, index)"
-              :disabled="
-                plotAllCharacterButtonDisabledFunction &&
-                plotAllCharacterButtonDisabledFunction(character, index)
-              "
+            <!-- 确认框 -->
+            <n-popconfirm
+              :negative-text="null"
+              positive-text="确定"
+              @positive-click="plotActionButtonFunction(character, index)"
             >
-              {{ plotActionButtonText }}
-            </n-button>
+              <template #trigger>
+                <n-button
+                  type="primary"
+                  size="large"
+                  strong
+                  secondary
+                  :disabled="
+                    plotAllCharacterButtonDisabledFunction &&
+                    plotAllCharacterButtonDisabledFunction(character, index)
+                  "
+                >
+                  {{ plotActionButtonText }}
+                </n-button>
+              </template>
+              <span class="text-base">
+                确认选择 <span class="font-bold">玩家{{ index + 1 }}</span> 吗？
+              </span>
+            </n-popconfirm>
           </template>
         </CharacterCard>
       </div>
     </div>
 
+    <!-- 展示单个角色卡片 -->
     <div v-show="isShowSingleCharacter" class="px-8 py-2">
       <CharacterCard
         :character="plotSingleCharacter"
@@ -82,20 +96,30 @@
         "
       >
         <template v-if="plotActionButtonFunction" #action>
-          <n-button
-            type="primary"
-            size="large"
-            strong
-            secondary
-            @click="plotActionButtonFunction(character)"
-            :disabled="plotActionButtonDisabled"
+          <!-- 确认框 -->
+          <n-popconfirm
+            :negative-text="null"
+            positive-text="确定"
+            @positive-click="plotActionButtonFunction(character)"
           >
-            {{ plotActionButtonText }}
-          </n-button>
+            <template #trigger>
+              <n-button
+                type="primary"
+                size="large"
+                strong
+                secondary
+                :disabled="plotActionButtonDisabled"
+              >
+                {{ plotActionButtonText }}
+              </n-button>
+            </template>
+            确认执行该操作？该操作不能撤回。
+          </n-popconfirm>
         </template>
       </CharacterCard>
     </div>
 
+    <!-- 继续按钮 -->
     <div v-show="plotContinueButtonText" class="text-center mt-4">
       <n-button
         type="primary"
@@ -121,7 +145,7 @@ import plots from "../assets/data/plots.json";
 const router = useRouter();
 const game = useGameStore();
 const audioController = useAudioController();
-const _isDev = import.meta.env.DEV;
+const _isDev = false; // import.meta.env.DEV;
 
 const gameCharacter = ref(
   game.playerIdentity.map((character) => {
@@ -432,10 +456,16 @@ class Plots {
   }
 
   async wolf_open() {
+    if (!gameCharacter.value.some((item) => item.name === "狼人")) {
+      plot.witch_open();
+      return;
+    }
     this.hideAllCharacter();
     this.hideSingleCharacter();
+    this.setContinueButtonText("");
+    this.setContinueButtonFunction(null);
+    this.setTips(TIPS_DEFAULT);
     this.playPlotAudio("wolf_open");
-    this.setContinueButtonFunction(plot.wolf_kill);
     if (this.day === 1) {
       await wait(17000);
     } else {
@@ -499,6 +529,10 @@ class Plots {
   }
 
   async witch_open() {
+    if (!gameCharacter.value.some((item) => item.name === "女巫")) {
+      plot.seer_open();
+      return;
+    }
     plot.playPlotAudio("witch_open");
     await wait(4000);
     plot.witch_save();
@@ -610,6 +644,10 @@ class Plots {
   }
 
   async seer_open() {
+    if (!gameCharacter.value.some((item) => item.name === "预言家")) {
+      plot.next_day();
+      return;
+    }
     plot.playPlotAudio("seer_open");
     plot.setTips(TIPS_DEFAULT);
     await wait(4500);
