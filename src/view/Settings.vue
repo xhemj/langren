@@ -82,6 +82,19 @@
         开始游戏
       </n-button>
     </div>
+    <div class="w-full text-center text-xs text-gray-400 mt-4">
+      <p>
+        <span>狼人杀语音助手 </span>
+        <span class="border-b border-dashed border-gray-400">
+          {{ new Date(now).toLocaleDateString() }}
+        </span>
+        <span> - </span>
+        <span class="border-b border-dashed border-gray-400">
+          {{ commitSha }}
+        </span>
+      </p>
+      <p>&copy; {{ new Date().getFullYear() }} Xhemj</p>
+    </div>
   </div>
 </template>
 
@@ -96,6 +109,11 @@ import characters from "../assets/data/characters.json";
 
 const game = useGameStore();
 const router = useRouter();
+
+// @ts-ignore
+const commitSha = __COMMIT_HASH__;
+// @ts-ignore
+const now = __BUILD_DATE__;
 
 /**
  * 是否选择完成

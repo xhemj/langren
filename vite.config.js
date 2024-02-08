@@ -5,6 +5,7 @@ import Components from "unplugin-vue-components/vite";
 import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 import legacy from "@vitejs/plugin-legacy";
 import { visualizer } from "rollup-plugin-visualizer";
+import * as child from "child_process";
 
 const plugins = [];
 
@@ -19,12 +20,24 @@ if (process.env.NODE_ENV === "production") {
   );
 }
 
+const commitHash = child
+  .execSync(
+    "D:\\cmder\\vendor\\git-for-windows\\bin\\git.exe rev-parse --short HEAD"
+  )
+  .toString();
+
+const buildDate = new Date().getTime();
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "./",
   // process.env.NODE_ENV === "production"
   //   ? "https://www.xhemj.work/langren/"
   //   : "./",
+  define: {
+    __COMMIT_HASH__: JSON.stringify(commitHash),
+    __BUILD_DATE__: JSON.stringify(buildDate),
+  },
   plugins: [
     vue(),
     AutoImport({

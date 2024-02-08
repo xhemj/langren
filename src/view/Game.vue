@@ -6,7 +6,7 @@
       class="absolute top-0 left-0 right-0 bottom-0 z-50 flex justify-center items-center"
     >
       <n-spin v-if="!isLoadAudio && !isStartGame">
-        <template #description> 加载游戏资源中…… </template>
+        <template #description>加载游戏资源中……</template>
       </n-spin>
 
       <n-button
@@ -28,7 +28,7 @@
         'min-h-[20vh]': isShowAllCharacter || isShowSingleCharacter,
       }"
     >
-      <h2 class="font-bold text-4xl mb-4 break-words">
+      <h2 class="font-bold text-4xl mb-2 break-words">
         {{ plotText }}
       </h2>
       <p v-show="plotTips" class="font-medium text-xl">{{ plotTips }}</p>
@@ -46,7 +46,7 @@
       >
         <CharacterCard
           :character="{
-            name: character.isDead ? `已死亡` : `玩家${index + 1}`,
+            name: character.isDead ? `死亡` : `玩家${index + 1}`,
           }"
           :font-size="'text-xl'"
           :highlight="
@@ -76,9 +76,7 @@
                   {{ plotActionButtonText }}
                 </n-button>
               </template>
-              <span class="text-base">
-                确认选择 <span class="font-bold">玩家{{ index + 1 }}</span> 吗？
-              </span>
+              确认选择 <span class="font-bold">玩家{{ index + 1 }}</span> 吗？
             </n-popconfirm>
           </template>
         </CharacterCard>
@@ -113,7 +111,9 @@
                 {{ plotActionButtonText }}
               </n-button>
             </template>
-            确认执行该操作？该操作不能撤回。
+            确定
+            <span class="font-bold">{{ plotActionButtonText }}</span>
+            吗？该操作不能撤回。
           </n-popconfirm>
         </template>
       </CharacterCard>
@@ -209,7 +209,7 @@ async function startGame() {
 
 const UNKNOWN_AVATAR =
   "https://staticoss.xhemj.work/langren.xhemj.com/character/unknown.jpg";
-const TIPS_DEFAULT = "本轮无需额外操作";
+const TIPS_DEFAULT = "音频自动播放，无需操作";
 
 class Plots {
   constructor() {
