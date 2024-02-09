@@ -25,7 +25,7 @@
       class="flex items-center flex-col justify-end"
       :class="{
         'min-h-[45vh]': !isShowAllCharacter && !isShowSingleCharacter,
-        'min-h-[20vh]': isShowAllCharacter || isShowSingleCharacter,
+        'min-h-[15vh]': isShowAllCharacter || isShowSingleCharacter,
       }"
     >
       <h2 class="font-bold text-4xl mb-2 break-words">
@@ -76,7 +76,9 @@
                   {{ plotActionButtonText }}
                 </n-button>
               </template>
-              确认选择 <span class="font-bold">玩家{{ index + 1 }}</span> 吗？
+              <span class="font-medium">
+                确认选择 <span class="font-bold">玩家{{ index + 1 }}</span> 吗？
+              </span>
             </n-popconfirm>
           </template>
         </CharacterCard>
@@ -111,9 +113,11 @@
                 {{ plotActionButtonText }}
               </n-button>
             </template>
-            确定
-            <span class="font-bold">{{ plotActionButtonText }}</span>
-            吗？该操作不能撤回。
+            <span class="font-medium">
+              确定
+              <span class="font-bold">{{ plotActionButtonText }}</span>
+              吗？该操作不能撤回。
+            </span>
           </n-popconfirm>
         </template>
       </CharacterCard>
@@ -131,21 +135,62 @@
         {{ plotContinueButtonText }}
       </n-button>
     </div>
+
+    <!-- 信息面板触发按钮 -->
+    <div class="absolute top-2 right-2 z-50">
+      <n-popconfirm
+        :negative-text="null"
+        positive-text="确定查看"
+        @positive-click="isShowDrawer = true"
+      >
+        <template #trigger>
+          <n-button strong quaternary circle size="large">
+            <template #icon>
+              <Icon><Info20Regular /></Icon>
+            </template>
+          </n-button>
+        </template>
+        <span class="font-medium">
+          在游戏中查看调试信息会<span class="text-red-400">严重影响</span
+          >游戏体验，非调试人员请勿打开。
+        </span>
+      </n-popconfirm>
+    </div>
+    <!-- 信息面板 -->
+    <n-drawer
+      v-model:show="isShowDrawer"
+      placement="bottom"
+      to="#page"
+      height="50vh"
+    >
+      <n-drawer-content closable :native-scrollbar="false">
+        <template #header>
+          <h3 class="font-medium text-lg">调试信息</h3>
+        </template>
+        <GamePanel :game-character="gameCharacter" />
+      </n-drawer-content>
+    </n-drawer>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, defineAsyncComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useGameStore } from "../stores/game";
 import useAudioController from "../utils/AudioController";
 import CharacterCard from "../components/CharacterCard.vue";
+import { Info20Regular } from "@vicons/fluent";
+import { Icon } from "@vicons/utils";
 import plots from "../assets/data/plots.json";
+
+const GamePanel = defineAsyncComponent(() =>
+  import("../components/GamePanel.vue")
+);
 
 const router = useRouter();
 const game = useGameStore();
 const audioController = useAudioController();
-const _isDev = false; // import.meta.env.DEV;
+const _isDev = import.meta.env.DEV;
 
 const gameCharacter = ref(
   game.playerIdentity.map((character) => {
@@ -161,6 +206,7 @@ const isLoadAudio = ref(false);
 const isStartGame = ref(false);
 const isShowAllCharacter = ref(false);
 const isShowSingleCharacter = ref(false);
+const isShowDrawer = ref(false);
 
 const plotText = ref("");
 const plotTips = ref("");

@@ -35,7 +35,7 @@
             class="w-1/2 p-1"
             :key="character.name"
           >
-            <characterCard
+            <CharacterCard
               :character="character"
               :highlight="Boolean(game.characterList[character.name])"
             >
@@ -65,7 +65,7 @@
                   </n-button>
                 </div>
               </template>
-            </characterCard>
+            </CharacterCard>
           </div>
         </div>
       </n-scrollbar>
@@ -113,8 +113,10 @@ import { Add20Filled, Subtract20Filled } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import { useGameStore } from "../stores/game";
 import { useRouter } from "vue-router";
-import characterCard from "../components/characterCard.vue";
+import useAudioController from "../utils/AudioController";
+import CharacterCard from "../components/CharacterCard.vue";
 import characters from "../assets/data/characters.json";
+import plots from "../assets/data/plots.json";
 
 const game = useGameStore();
 const router = useRouter();
@@ -123,6 +125,12 @@ const router = useRouter();
 const commitSha = __COMMIT_HASH__;
 // @ts-ignore
 const now = __BUILD_DATE__;
+
+// 游戏音频
+const gameAudioList = [];
+for (let key in plots) {
+  gameAudioList.push(key);
+}
 
 /**
  * 是否选择完成
@@ -171,6 +179,12 @@ const onStartGame = () => {
   // console.log("====开始游戏");
   router.push({ name: "assign" });
 };
+
+const audioController = useAudioController();
+
+onMounted(() => {
+  audioController.preload(gameAudioList);
+});
 </script>
 
 <style lang="scss" scoped></style>

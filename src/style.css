@@ -1,3 +1,6 @@
+@import "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify,Latin&display=swap";
+@import "https://cdn-font.hyperos.mi.com/font/css?family=MiSans:200,300,400,450,500,600,650,700:Chinese_Simplify,Latin&display=swap";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +13,7 @@
 #app,
 #page {
   /* background-image: url("https://staticoss.xhemj.work/spy.xhemj.com/bg.jpg"); */
-  @apply bg-white bg-center bg-repeat bg-contain z-10 overflow-x-hidden border-gray-400 absolute left-0 right-0 top-0 bottom-0 w-full min-h-screen px-4 py-6 mx-auto my-0 max-w-[425px] overflow-y-auto;
+  @apply bg-white bg-center bg-repeat bg-contain z-10 overflow-x-hidden border-gray-400 absolute left-0 right-0 top-0 bottom-0 w-full min-h-screen px-4 py-6 mx-auto my-0 max-w-[450px] overflow-y-hidden;
 }
 
 /* 图片资源预加载 */
