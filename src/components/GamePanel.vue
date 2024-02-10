@@ -1,22 +1,70 @@
 <template>
-  <h3 class="font-bold text-lg">玩家信息：</h3>
-  <n-data-table
-    :columns="columns"
-    :data="data"
-    :bordered="false"
-    :striped="true"
-  />
+  <div v-if="!game.isConfirmOpenDevPanel" class="w-full">
+    <p class="font-medium text-base">
+      在游戏中查看调试信息会<span class="text-red-500">严重影响</span
+      >游戏体验，非开发人员不建议查看。
+    </p>
+    <p class="font-medium text-base">确定要查看调试信息吗？</p>
+    <div class="mt-4">
+      <n-button type="error" @click="game.isConfirmOpenDevPanel = true">
+        查看调试信息
+      </n-button>
+    </div>
+  </div>
+  <div v-else class="w-full flex flex-col">
+    <h3 class="font-bold text-lg">玩家信息</h3>
+    <n-data-table
+      :columns="columns"
+      :data="data"
+      :bordered="false"
+      :striped="true"
+    />
+
+    <h3 class="font-bold text-lg mt-4">游戏信息</h3>
+    <p class="text-base">游戏天数：第 {{ plot.day }} 天</p>
+    <p class="text-base">
+      女巫解药状态：{{ plot.witchIsUsedMedicine ? "已使用" : "未使用" }}
+    </p>
+    <p class="text-base">
+      女巫毒药状态：{{ plot.witchIsUsedPoison ? "已使用" : "未使用" }}
+    </p>
+
+    <h3 class="font-bold text-lg mt-4">构建信息</h3>
+    <p class="text-base">构建时间：{{ new Date(now).toLocaleString() }}</p>
+    <p class="text-base">构建类型：{{ buildType }}</p>
+    <p class="text-base">内部项目代号：{{ packageJson.name }}</p>
+    <p class="text-base">内部构建编号：{{ commitSha }}</p>
+
+    <h3 class="font-bold text-lg mt-4">游戏环境</h3>
+    <p class="text-base">
+      运行环境：<span class="!font-mono">{{ userAgent }}</span>
+    </p>
+  </div>
 </template>
 
 <script setup>
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
+import packageJson from "../../package.json";
+import { useGameStore } from "../stores/game";
 
 const props = defineProps({
   gameCharacter: {
     type: Object,
     required: true,
   },
+  plot: {
+    type: Object,
+    required: true,
+  },
 });
+
+const game = useGameStore();
+// @ts-ignore
+const commitSha = __COMMIT_HASH__;
+// @ts-ignore
+const now = __BUILD_DATE__;
+const buildType = ref(process.env.NODE_ENV);
+const userAgent = ref(null);
 
 const data = ref([]);
 
@@ -59,6 +107,10 @@ const columns = ref([
     key: "status",
   },
 ]);
+
+onMounted(() => {
+  userAgent.value = navigator.userAgent;
+});
 </script>
 
 <style lang="scss" scoped></style>

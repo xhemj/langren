@@ -22,6 +22,11 @@ export const useGameStore = defineStore("game", {
        * 玩家身份
        */
       playerIdentity: [],
+      /**
+       * @type {boolean}
+       * 是否打开开发者面板
+       */
+      isConfirmOpenDevPanel: false,
     };
   },
 });

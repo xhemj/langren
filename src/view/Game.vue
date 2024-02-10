@@ -138,36 +138,30 @@
 
     <!-- 信息面板触发按钮 -->
     <div class="absolute top-2 right-2 z-50">
-      <n-popconfirm
-        :negative-text="null"
-        positive-text="确定查看"
-        @positive-click="isShowDrawer = true"
+      <n-button
+        strong
+        quaternary
+        circle
+        size="large"
+        @click="isShowDrawer = true"
       >
-        <template #trigger>
-          <n-button strong quaternary circle size="large">
-            <template #icon>
-              <Icon><Info20Regular /></Icon>
-            </template>
-          </n-button>
+        <template #icon>
+          <Icon><Settings20Regular /></Icon>
         </template>
-        <span class="font-medium">
-          在游戏中查看调试信息会<span class="text-red-400">严重影响</span
-          >游戏体验，非调试人员请勿打开。
-        </span>
-      </n-popconfirm>
+      </n-button>
     </div>
     <!-- 信息面板 -->
     <n-drawer
       v-model:show="isShowDrawer"
       placement="bottom"
       to="#page"
-      height="50vh"
+      height="75vh"
     >
       <n-drawer-content closable :native-scrollbar="false">
         <template #header>
-          <h3 class="font-medium text-lg">调试信息</h3>
+          <h3 class="font-bold text-lg">调试信息</h3>
         </template>
-        <GamePanel :game-character="gameCharacter" />
+        <GamePanel :game-character="gameCharacter" :plot="plot" />
       </n-drawer-content>
     </n-drawer>
   </div>
@@ -179,7 +173,7 @@ import { useRouter } from "vue-router";
 import { useGameStore } from "../stores/game";
 import useAudioController from "../utils/AudioController";
 import CharacterCard from "../components/CharacterCard.vue";
-import { Info20Regular } from "@vicons/fluent";
+import { Settings20Regular } from "@vicons/fluent";
 import { Icon } from "@vicons/utils";
 import plots from "../assets/data/plots.json";
 
