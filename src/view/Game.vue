@@ -46,7 +46,7 @@
       >
         <CharacterCard
           :character="{
-            name: character.isDead ? `死亡` : `玩家${index + 1}`,
+            name: handleCharacterName(character, index),
           }"
           :font-size="'text-xl'"
           :highlight="
@@ -192,6 +192,7 @@ const gameCharacter = ref(
       name: character.name,
       role: character.role,
       avatar: character.avatar,
+      playerName: character.playerName,
     };
   })
 );
@@ -232,6 +233,14 @@ const gameAudioList = [];
 for (let key in plots) {
   gameAudioList.push(key);
 }
+
+/**
+ * 处理角色名称
+ * @param {Object} character 角色
+ */
+const handleCharacterName = (character, index) => {
+  return character.isDead ? `死亡` : character.playerName || `玩家${index + 1}`;
+};
 
 async function handleGameLoop() {
   await audioController.preload(gameAudioList);
@@ -888,6 +897,10 @@ async function wait(time) {
 onMounted(() => {
   if (Object.keys(game.characterList).length === 0) {
     router.replace({ name: "settings" });
+  }
+
+  if (_isDev) {
+    game.isConfirmOpenDevPanel = true;
   }
 
   handleGameLoop();
