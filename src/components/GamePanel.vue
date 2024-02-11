@@ -20,14 +20,14 @@
       :striped="true"
     />
 
-    <h3 class="font-bold text-lg mt-4">游戏信息</h3>
+    <!-- <h3 class="font-bold text-lg mt-4">游戏信息</h3>
     <p class="text-base">游戏天数：第 {{ plot.day }} 天</p>
     <p class="text-base">
       女巫解药状态：{{ plot.witchIsUsedMedicine ? "已使用" : "未使用" }}
     </p>
     <p class="text-base">
       女巫毒药状态：{{ plot.witchIsUsedPoison ? "已使用" : "未使用" }}
-    </p>
+    </p> -->
 
     <h3 class="font-bold text-lg mt-4">构建信息</h3>
     <p class="text-base">构建时间：{{ new Date(now).toLocaleString() }}</p>
@@ -49,10 +49,6 @@ import { useGameStore } from "../stores/game";
 
 const props = defineProps({
   gameCharacter: {
-    type: Object,
-    required: true,
-  },
-  plot: {
     type: Object,
     required: true,
   },

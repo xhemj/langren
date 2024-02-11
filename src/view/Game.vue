@@ -161,7 +161,7 @@
         <template #header>
           <h3 class="font-bold text-lg">调试信息</h3>
         </template>
-        <GamePanel :game-character="gameCharacter" :plot="plot" />
+        <GamePanel :game-character="gameCharacter" />
       </n-drawer-content>
     </n-drawer>
   </div>
@@ -184,7 +184,7 @@ const GamePanel = defineAsyncComponent(() =>
 const router = useRouter();
 const game = useGameStore();
 const audioController = useAudioController();
-const _isDev = import.meta.env.DEV;
+const _isDev = false; // import.meta.env.DEV;
 
 const gameCharacter = ref(
   game.playerIdentity.map((character) => {
@@ -250,9 +250,9 @@ async function handleGameLoop() {
 async function startGame() {
   isStartGame.value = true;
   if (!_isDev) {
-    plot.wolf_open();
+    wolf_open();
   } else {
-    plot.wolf_kill();
+    wolf_kill();
   }
 }
 
@@ -260,291 +260,390 @@ const UNKNOWN_AVATAR =
   "https://staticoss.xhemj.work/langren.xhemj.com/character/unknown.jpg";
 const TIPS_DEFAULT = "音频自动播放，无需操作";
 
-class Plots {
-  constructor() {
-    /**
-     * 狼人杀死的角色
-     */
-    this.wolfKilledCharacter = null;
-    /**
-     * 狼人杀死的角色索引
-     */
-    this.wolfKilledCharacterIndex = null;
-    /**
-     * 女巫是否使用毒药
-     */
-    this.witchIsUsedPoison = false;
-    /**
-     * 女巫是否使用解药
-     */
-    this.witchIsUsedMedicine = false;
-    /**
-     * 女巫杀死的角色
-     */
-    this.witchKilledCharacter = null;
-    /**
-     * 女巫杀死的角色索引
-     */
-    this.witchKilledCharacterIndex = null;
-    /**
-     * 预言家查验的角色
-     */
-    this.seerCheckCharacter = null;
-    /**
-     * 预言家查验的角色索引
-     */
-    this.seerCheckCharacterIndex = null;
-    /**
-     * 第几天
-     * @type {number}
-     */
-    this.day = 1;
-  }
+/**
+ * 狼人杀死的角色
+ */
+const wolfKilledCharacter = ref(null);
+/**
+ * 狼人杀死的角色索引
+ */
+const wolfKilledCharacterIndex = ref(null);
+/**
+ * 女巫是否使用毒药
+ */
+const witchIsUsedPoison = ref(false);
+/**
+ * 女巫是否使用解药
+ */
+const witchIsUsedMedicine = ref(false);
+/**
+ * 女巫杀死的角色
+ */
+const witchKilledCharacter = ref(null);
+/**
+ * 女巫杀死的角色索引
+ */
+const witchKilledCharacterIndex = ref(null);
+/**
+ * 预言家查验的角色
+ */
+const seerCheckCharacter = ref(null);
+/**
+ * 预言家查验的角色索引
+ */
+const seerCheckCharacterIndex = ref(null);
+/**
+ * 第几天
+ */
+const day = ref(1);
 
-  /**
-   * 播放剧情音频
-   * @param {string} name 音频名称
-   */
-  playPlotAudio(name) {
-    audioController.play(name);
-    plotText.value = plots[name];
-  }
+/**
+ * 播放剧情音频
+ * @param {string} name 音频名称
+ */
+function playPlotAudio(name) {
+  audioController.play(name);
+  setPlotText(plots[name]);
+}
 
-  /**
-   * 设置继续按钮的功能
-   * @param {Function} func 按钮功能
-   */
-  setContinueButtonFunction(func) {
-    plotContinueButtonFunction = func;
-  }
+/**
+ * 设置继续按钮的功能
+ * @param {Function} func 按钮功能
+ */
+function setContinueButtonFunction(func) {
+  plotContinueButtonFunction = func;
+}
 
-  /**
-   * 设置继续按钮的文字
-   * @param {string} text 按钮文字
-   */
-  setContinueButtonText(text) {
-    plotContinueButtonText.value = text;
-  }
+/**
+ * 设置继续按钮的文字
+ * @param {string} text 按钮文字
+ */
+function setContinueButtonText(text) {
+  plotContinueButtonText.value = text;
+}
 
-  /**
-   * 设置继续按钮是否禁用
-   */
-  setContinueButtonDisabled(disabled) {
-    plotContinueButtonDisabled.value = disabled;
-  }
+/**
+ * 设置继续按钮是否禁用
+ */
+function setContinueButtonDisabled(disabled) {
+  plotContinueButtonDisabled.value = disabled;
+}
 
-  /**
-   * 设置动作按钮的功能
-   * @param {Function} func 按钮功能
-   */
-  setActionButtonFunction(func) {
-    plotActionButtonFunction = func;
-  }
+/**
+ * 设置动作按钮的功能
+ * @param {Function} func 按钮功能
+ */
+function setActionButtonFunction(func) {
+  plotActionButtonFunction = func;
+}
 
-  /**
-   * 设置动作按钮的文字
-   * @param {string} text 按钮文字
-   */
-  setActionButtonText(text) {
-    plotActionButtonText.value = text;
-  }
+/**
+ * 设置动作按钮的文字
+ * @param {string} text 按钮文字
+ */
+function setActionButtonText(text) {
+  plotActionButtonText.value = text;
+}
 
-  /**
-   * 设置动作按钮是否禁用
-   */
-  setActionButtonDisabled(disabled) {
-    plotActionButtonDisabled.value = disabled;
-  }
+/**
+ * 设置动作按钮是否禁用
+ */
+function setActionButtonDisabled(disabled) {
+  plotActionButtonDisabled.value = disabled;
+}
 
-  /**
-   * 设置提示文字
-   * @param {string} text 提示文字
-   */
-  setTips(text) {
-    plotTips.value = text;
-  }
+/**
+ * 设置提示文字
+ * @param {string} text 提示文字
+ */
+function setTips(text) {
+  plotTips.value = text;
+}
 
-  /**
-   * 显示全部角色
-   */
-  showAllCharacter() {
-    isShowAllCharacter.value = true;
-  }
+/**
+ * 设置剧情文字
+ * @param {string} text 剧情文字
+ */
+function setPlotText(text) {
+  plotText.value = text;
+}
 
-  /**
-   * 设置全部角色高亮函数
-   * @param {Function} func 高亮函数
-   */
-  setAllCharacterHighlightFunction(func) {
-    plotAllCharacterHighlightFunction = func;
-  }
+/**
+ * 显示全部角色
+ */
+function showAllCharacter() {
+  isShowAllCharacter.value = true;
+}
 
-  /**
-   * 设置全部角色按钮禁用函数
-   * @param {Function} func 按钮禁用函数
-   */
-  setAllCharacterButtonDisabledFunction(func) {
-    plotAllCharacterButtonDisabledFunction = func;
-  }
+/**
+ * 设置全部角色高亮函数
+ * @param {Function} func 高亮函数
+ */
+function setAllCharacterHighlightFunction(func) {
+  plotAllCharacterHighlightFunction = func;
+}
 
-  /**
-   * 设置全部角色高亮颜色
-   * @param {string} color 高亮颜色
-   */
-  setAllCharacterHighlightColor(color) {
-    plotAllCharacterHighlightColor.value = color;
-  }
+/**
+ * 设置全部角色按钮禁用函数
+ * @param {Function} func 按钮禁用函数
+ */
+function setAllCharacterButtonDisabledFunction(func) {
+  plotAllCharacterButtonDisabledFunction = func;
+}
 
-  /**
-   * 显示单个角色
-   */
-  showSingleCharacter(character) {
-    isShowSingleCharacter.value = true;
-    plotSingleCharacter.value = character;
-  }
+/**
+ * 设置全部角色高亮颜色
+ * @param {string} color 高亮颜色
+ */
+function setAllCharacterHighlightColor(color) {
+  plotAllCharacterHighlightColor.value = color;
+}
 
-  /**
-   * 设置单个角色高亮函数
-   * @param {Function} func 高亮函数
-   */
-  setSingleCharacterHighlightFunction(func) {
-    plotSingleCharacterHighlightFunction = func;
-  }
+/**
+ * 显示单个角色
+ */
+function showSingleCharacter(character) {
+  isShowSingleCharacter.value = true;
+  plotSingleCharacter.value = character;
+}
 
-  /**
-   * 隐藏全部角色
-   */
-  hideAllCharacter() {
-    isShowAllCharacter.value = false;
-  }
+/**
+ * 设置单个角色高亮函数
+ * @param {Function} func 高亮函数
+ */
+function setSingleCharacterHighlightFunction(func) {
+  plotSingleCharacterHighlightFunction = func;
+}
 
-  /**
-   * 隐藏单个角色
-   */
-  hideSingleCharacter() {
-    isShowSingleCharacter.value = false;
-  }
+/**
+ * 隐藏全部角色
+ */
+function hideAllCharacter() {
+  isShowAllCharacter.value = false;
+}
 
-  /**
-   * 设置被杀死的角色
-   * @param {Object} character 角色
-   * @param {number} index 角色索引
-   */
-  setWolfKilledCharacter(character, index) {
-    this.wolfKilledCharacter = character;
-    this.wolfKilledCharacterIndex = index;
-  }
+/**
+ * 隐藏单个角色
+ */
+function hideSingleCharacter() {
+  isShowSingleCharacter.value = false;
+}
 
-  /**
-   * 设置被女巫杀死的角色
-   * @param {Object} character 角色
-   * @param {number} index 角色索引
-   */
-  setWitcKilledCharacter(character, index) {
-    this.witchKilledCharacter = character;
-    this.witchKilledCharacterIndex = index;
-  }
+/**
+ * 设置被杀死的角色
+ * @param {Object} character 角色
+ * @param {number} index 角色索引
+ */
+function setWolfKilledCharacter(character, index) {
+  wolfKilledCharacter.value = character;
+  wolfKilledCharacterIndex.value = index;
+}
 
-  /**
-   * 检测女巫剩余的药剂
-   */
-  checkWitchMedicine() {
-    if (!plot.witchIsUsedMedicine && !plot.witchIsUsedPoison) {
-      plot.setTips("当前还剩一瓶解药和一瓶毒药");
-    } else if (plot.witchIsUsedMedicine && !plot.witchIsUsedPoison) {
-      plot.setTips("当前还剩一瓶毒药，已无解药");
-    } else if (!plot.witchIsUsedMedicine && plot.witchIsUsedPoison) {
-      plot.setTips("当前还剩一瓶解药，已无毒药");
+/**
+ * 设置被女巫杀死的角色
+ * @param {Object} character 角色
+ * @param {number} index 角色索引
+ */
+function setWitcKilledCharacter(character, index) {
+  witchKilledCharacter.value = character;
+  witchKilledCharacterIndex.value = index;
+}
+
+/**
+ * 检测女巫剩余的药剂
+ */
+function checkWitchMedicine() {
+  if (!witchIsUsedMedicine.value && !witchIsUsedPoison.value) {
+    setTips("当前还剩一瓶解药和一瓶毒药");
+  } else if (witchIsUsedMedicine.value && !witchIsUsedPoison.value) {
+    setTips("当前还剩一瓶毒药，已无解药");
+  } else if (!witchIsUsedMedicine.value && witchIsUsedPoison.value) {
+    setTips("当前还剩一瓶解药，已无毒药");
+  } else {
+    setTips("本轮没有药水了，请点击按钮以继续");
+  }
+}
+
+/**
+ * 处理角色状态
+ */
+function handleCharacterState() {
+  // 所有本轮被杀死的角色新增属性 isDead 用来分辨
+  gameCharacter.value.forEach((character) => {
+    if (character.isKilled || character.isKilledByWitch || character.isVoted) {
+      character.isDead = true;
+    }
+  });
+
+  // 重置所有角色的状态
+  gameCharacter.value.forEach((character) => {
+    character.isKilled = false;
+    character.isKilledByWitch = false;
+    character.isSelectBySeer = false;
+    character.isVoted = false;
+  });
+}
+
+/**
+ * 重置状态
+ */
+function resetState() {
+  setContinueButtonFunction(null);
+  setContinueButtonText("");
+  setContinueButtonDisabled(false);
+  setActionButtonFunction(null);
+  setActionButtonText("");
+  setActionButtonDisabled(false);
+  setSingleCharacterHighlightFunction(null);
+  setAllCharacterHighlightFunction(null);
+  setAllCharacterButtonDisabledFunction(null);
+  setAllCharacterHighlightColor("#429942");
+  setTips("");
+  setPlotText("");
+  hideAllCharacter();
+  hideSingleCharacter();
+  handleCharacterState();
+}
+
+async function wolf_open() {
+  if (!gameCharacter.value.some((item) => item.name === "狼人")) {
+    witch_open();
+    return;
+  }
+  hideAllCharacter();
+  hideSingleCharacter();
+  setContinueButtonText("");
+  setContinueButtonFunction(null);
+  setTips(TIPS_DEFAULT);
+  playPlotAudio("wolf_open");
+  if (day.value === 1) {
+    await wait(17000);
+  } else {
+    await wait(11000);
+  }
+  wolf_kill();
+}
+
+async function wolf_kill() {
+  playPlotAudio("wolf_kill");
+  setContinueButtonText("继续");
+  setActionButtonText("选择");
+  setTips("请选择要杀死的角色");
+  showAllCharacter();
+  setContinueButtonDisabled(true);
+
+  const isSelect = ref(false);
+
+  setAllCharacterHighlightFunction((character, index) => {
+    return character.isKilled;
+  });
+
+  setAllCharacterButtonDisabledFunction((character, index) => {
+    return character.isKilled || character.isDead;
+  });
+
+  setActionButtonFunction((character, index) => {
+    if (isSelect.value) {
+      gameCharacter.value.forEach((item) => {
+        item.isKilled = false;
+      });
+    }
+    const characterData = {
+      name: `玩家${index + 1}`,
+      avatar: UNKNOWN_AVATAR,
+      role: "unknown",
+    };
+    setWolfKilledCharacter(characterData, index);
+    character.isKilled = true;
+    isSelect.value = true;
+    setContinueButtonDisabled(false);
+  });
+  setContinueButtonFunction(() => {
+    if (!isSelect.value) return;
+    if (!_isDev) {
+      wolf_close_eyes();
     } else {
-      plot.setTips("本轮没有药水了，请点击按钮以继续");
+      witch_save();
     }
+  });
+}
+
+async function wolf_close_eyes() {
+  setActionButtonFunction(null);
+  setContinueButtonText("");
+  hideAllCharacter();
+  playPlotAudio("wolf_close_eyes");
+  setTips(TIPS_DEFAULT);
+  await wait(5000);
+  witch_open();
+}
+
+async function witch_open() {
+  if (!gameCharacter.value.some((item) => item.name === "女巫")) {
+    seer_open();
+    return;
   }
+  playPlotAudio("witch_open");
+  await wait(4000);
+  witch_save();
+}
 
-  /**
-   * 处理角色状态
-   */
-  handleCharacterState() {
-    // 所有本轮被杀死的角色新增属性 isDead 用来分辨
-    gameCharacter.value.forEach((character) => {
-      if (
-        character.isKilled ||
-        character.isKilledByWitch ||
-        character.isVoted
-      ) {
-        character.isDead = true;
-      }
-    });
+async function witch_save() {
+  playPlotAudio("witch_save");
+  showSingleCharacter(wolfKilledCharacter.value);
+  hideAllCharacter();
+  setContinueButtonText("不使用解药");
+  checkWitchMedicine();
 
-    // 重置所有角色的状态
-    gameCharacter.value.forEach((character) => {
-      character.isKilled = false;
-      character.isKilledByWitch = false;
-      character.isSelectBySeer = false;
-      character.isVoted = false;
+  if (!witchIsUsedMedicine.value) {
+    setActionButtonText("使用解药");
+    setActionButtonDisabled(false);
+    setActionButtonFunction(() => {
+      setActionButtonDisabled(true);
+      setActionButtonText("已使用解药");
+      setContinueButtonText("继续");
+      witchIsUsedMedicine.value = true;
+      gameCharacter.value[wolfKilledCharacterIndex.value].isKilled = false;
+      wolfKilledCharacter.value = null;
+      wolfKilledCharacterIndex.value = null;
     });
+    setContinueButtonFunction(witch_kill);
+  } else {
+    setActionButtonDisabled(true);
+    setActionButtonText("已使用过解药");
+    setContinueButtonText("继续");
+    setTips(`已使用过解药，无法再次使用，${TIPS_DEFAULT}`);
+    setContinueButtonText("");
+    setContinueButtonFunction(null);
+    await wait(12500);
+    witch_kill();
   }
+}
 
-  /**
-   * 重置状态
-   */
-  resetState() {
-    plotContinueButtonFunction = null;
-    plotActionButtonFunction = null;
-    plotAllCharacterHighlightFunction = null;
-    plotAllCharacterButtonDisabledFunction = null;
-    plotSingleCharacterHighlightFunction = null;
-    plotContinueButtonText.value = "";
-    plotContinueButtonDisabled.value = false;
-    plotActionButtonText.value = "";
-    plotActionButtonDisabled.value = false;
-    plotSingleCharacter.value = {};
-    plotAllCharacterHighlightColor.value = "#429942";
-    plotTips.value = "";
-    plotText.value = "";
-    plot.handleCharacterState();
-  }
+async function witch_kill() {
+  playPlotAudio("witch_kill");
+  showAllCharacter();
+  hideSingleCharacter();
+  setActionButtonText("使用");
 
-  async wolf_open() {
-    if (!gameCharacter.value.some((item) => item.name === "狼人")) {
-      plot.witch_open();
-      return;
-    }
-    this.hideAllCharacter();
-    this.hideSingleCharacter();
-    this.setContinueButtonText("");
-    this.setContinueButtonFunction(null);
-    this.setTips(TIPS_DEFAULT);
-    this.playPlotAudio("wolf_open");
-    if (this.day === 1) {
-      await wait(17000);
-    } else {
-      await wait(11000);
-    }
-    this.wolf_kill();
-  }
+  setContinueButtonText("不使用毒药");
+  checkWitchMedicine();
 
-  async wolf_kill() {
-    plot.playPlotAudio("wolf_kill");
-    plot.setContinueButtonText("继续");
-    plot.setActionButtonText("选择");
-    plot.setTips("请选择要杀死的角色");
-    plot.showAllCharacter();
-    plot.setContinueButtonDisabled(true);
+  const isSelect = ref(false);
 
-    const isSelect = ref(false);
+  setAllCharacterHighlightFunction((character, index) => {
+    return character.isKilledByWitch;
+  });
 
-    plot.setAllCharacterHighlightFunction((character, index) => {
-      return character.isKilled;
-    });
+  setAllCharacterButtonDisabledFunction((character, index) => {
+    return character.isKilled || character.isKilledByWitch || character.isDead;
+  });
 
-    plot.setAllCharacterButtonDisabledFunction((character, index) => {
-      return character.isKilled || character.isDead;
-    });
-
-    plot.setActionButtonFunction((character, index) => {
+  if (!witchIsUsedPoison.value) {
+    setActionButtonFunction((character, index) => {
       if (isSelect.value) {
         gameCharacter.value.forEach((item) => {
-          item.isKilled = false;
+          item.isKilledByWitch = false;
         });
       }
       const characterData = {
@@ -552,339 +651,238 @@ class Plots {
         avatar: UNKNOWN_AVATAR,
         role: "unknown",
       };
-      plot.setWolfKilledCharacter(characterData, index);
-      character.isKilled = true;
+      setWitcKilledCharacter(characterData, index);
+      character.isKilledByWitch = true;
+      // character.isKilled = true;
       isSelect.value = true;
-      plot.setContinueButtonDisabled(false);
+      witchIsUsedPoison.value = true;
+      setContinueButtonText("继续");
     });
-    plot.setContinueButtonFunction(() => {
-      if (!isSelect.value) return;
+    setContinueButtonFunction(() => {
       if (!_isDev) {
-        plot.wolf_close_eyes();
+        witch_close();
       } else {
-        plot.witch_save();
+        seer_see();
       }
     });
-  }
-
-  async wolf_close_eyes() {
-    plot.setActionButtonFunction(null);
-    plot.setContinueButtonText("");
-    plot.hideAllCharacter();
-    plot.playPlotAudio("wolf_close_eyes");
-    plot.setTips(TIPS_DEFAULT);
+  } else {
+    setActionButtonDisabled(true);
+    setActionButtonText("");
+    setActionButtonFunction(null);
+    setContinueButtonText("");
+    setTips(`已使用过毒药，无法再次使用，${TIPS_DEFAULT}`);
+    setContinueButtonText("");
+    setContinueButtonFunction(null);
     await wait(5000);
-    plot.witch_open();
-  }
-
-  async witch_open() {
-    if (!gameCharacter.value.some((item) => item.name === "女巫")) {
-      plot.seer_open();
-      return;
-    }
-    plot.playPlotAudio("witch_open");
-    await wait(4000);
-    plot.witch_save();
-  }
-
-  async witch_save() {
-    plot.playPlotAudio("witch_save");
-    plot.showSingleCharacter(plot.wolfKilledCharacter);
-    plot.hideAllCharacter();
-    plot.setContinueButtonText("不使用解药");
-    plot.checkWitchMedicine();
-
-    if (!plot.witchIsUsedMedicine) {
-      plot.setActionButtonText("使用解药");
-      plot.setActionButtonDisabled(false);
-      plot.setActionButtonFunction(() => {
-        plot.setActionButtonDisabled(true);
-        plot.setActionButtonText("已使用解药");
-        plot.setContinueButtonText("继续");
-        plot.witchIsUsedMedicine = true;
-        gameCharacter.value[plot.wolfKilledCharacterIndex].isKilled = false;
-        plot.wolfKilledCharacter = null;
-        plot.wolfKilledCharacterIndex = null;
-      });
-      plot.setContinueButtonFunction(plot.witch_kill);
+    if (!_isDev) {
+      witch_close();
     } else {
-      plot.setActionButtonDisabled(true);
-      plot.setActionButtonText("已使用过解药");
-      plot.setContinueButtonText("继续");
-      plot.setTips(`已使用过解药，无法再次使用，${TIPS_DEFAULT}`);
-      plot.setContinueButtonText("");
-      plot.setContinueButtonFunction(null);
-      await wait(12500);
-      plot.witch_kill();
-    }
-  }
-
-  async witch_kill() {
-    plot.playPlotAudio("witch_kill");
-    plot.showAllCharacter();
-    plot.hideSingleCharacter();
-    plot.setActionButtonText("使用");
-
-    plot.setContinueButtonText("不使用毒药");
-    plot.checkWitchMedicine();
-
-    const isSelect = ref(false);
-
-    plot.setAllCharacterHighlightFunction((character, index) => {
-      return character.isKilledByWitch;
-    });
-
-    plot.setAllCharacterButtonDisabledFunction((character, index) => {
-      return (
-        character.isKilled || character.isKilledByWitch || character.isDead
-      );
-    });
-
-    if (!plot.witchIsUsedPoison) {
-      plot.setActionButtonFunction((character, index) => {
-        if (isSelect.value) {
-          gameCharacter.value.forEach((item) => {
-            item.isKilledByWitch = false;
-          });
-        }
-        const characterData = {
-          name: `玩家${index + 1}`,
-          avatar: UNKNOWN_AVATAR,
-          role: "unknown",
-        };
-        plot.setWitcKilledCharacter(characterData, index);
-        character.isKilledByWitch = true;
-        // character.isKilled = true;
-        isSelect.value = true;
-        plot.witchIsUsedPoison = true;
-        plot.setContinueButtonText("继续");
-      });
-      plot.setContinueButtonFunction(() => {
-        if (!_isDev) {
-          plot.witch_close();
-        } else {
-          plot.seer_see();
-        }
-      });
-    } else {
-      plot.setActionButtonDisabled(true);
-      plot.setActionButtonText("");
-      plot.setActionButtonFunction(null);
-      plot.setContinueButtonText("");
-      plot.setTips(`已使用过毒药，无法再次使用，${TIPS_DEFAULT}`);
-      plot.setContinueButtonText("");
-      plot.setContinueButtonFunction(null);
-      await wait(5000);
-      if (!_isDev) {
-        plot.witch_close();
-      } else {
-        plot.seer_see();
-      }
-    }
-  }
-
-  async witch_close() {
-    plot.playPlotAudio("witch_close");
-    plot.hideAllCharacter();
-    plot.setContinueButtonText("");
-    plot.setTips(TIPS_DEFAULT);
-    await wait(4000);
-    plot.seer_open();
-  }
-
-  async seer_open() {
-    if (!gameCharacter.value.some((item) => item.name === "预言家")) {
-      plot.next_day();
-      return;
-    }
-    plot.playPlotAudio("seer_open");
-    plot.setTips(TIPS_DEFAULT);
-    await wait(4500);
-    plot.seer_see();
-  }
-
-  async seer_see() {
-    plot.playPlotAudio("seer_see");
-    plot.setContinueButtonText("继续");
-    plot.showAllCharacter();
-    plot.setTips("请选择要查验的角色");
-    plot.setActionButtonText("选择");
-    plot.setContinueButtonDisabled(true);
-
-    const isSelect = ref(false);
-
-    plot.setAllCharacterHighlightFunction((character, index) => {
-      return character.isSelectBySeer;
-    });
-
-    plot.setAllCharacterButtonDisabledFunction((character, index) => {
-      return character.isSelectBySeer || character.isDead;
-    });
-
-    plot.setActionButtonFunction((character, index) => {
-      if (isSelect.value) {
-        gameCharacter.value.forEach((item) => {
-          item.isSelectBySeer = false;
-        });
-      }
-      plot.seerCheckCharacter = character;
-      plot.seerCheckCharacterIndex = index;
-      character.isSelectBySeer = true;
-      isSelect.value = true;
-      plot.setContinueButtonDisabled(false);
-    });
-
-    plot.setContinueButtonFunction(() => {
-      plot.seer_result();
-    });
-  }
-
-  async seer_result() {
-    plot.playPlotAudio("seer_result");
-    plot.setContinueButtonText("继续");
-    plot.hideAllCharacter();
-    plot.setActionButtonText("");
-    plot.setActionButtonFunction(null);
-
-    plot.setSingleCharacterHighlightFunction(() => true);
-    const role = plot.seerCheckCharacter.role === "good" ? "好人" : "坏人";
-    const data = {
-      name: role,
-      avatar: UNKNOWN_AVATAR,
-      role: plot.seerCheckCharacter.role,
-    };
-    plot.showSingleCharacter(data);
-    plot.setTips(`该角色是${role}`);
-
-    plot.setContinueButtonFunction(() => {
-      if (!_isDev) {
-        plot.seer_close();
-      } else {
-        plot.next_day();
-      }
-    });
-  }
-
-  async seer_close() {
-    plot.playPlotAudio("seer_close");
-    plot.hideSingleCharacter();
-    plot.setContinueButtonText("");
-    plot.setTips(TIPS_DEFAULT);
-    await wait(5000);
-    plot.next_day();
-  }
-
-  async next_day() {
-    plot.playPlotAudio("next_day");
-    plot.setTips("本轮已结束，请待全部玩家发言完毕后点击按钮继续");
-    plot.setContinueButtonText("前往投票");
-    plot.hideSingleCharacter();
-    plot.showAllCharacter();
-
-    plot.setAllCharacterHighlightFunction((character, index) => {
-      return character.isKilled || character.isKilledByWitch;
-    });
-    plot.setAllCharacterHighlightColor("#c9302c");
-
-    plot.setContinueButtonFunction(() => {
-      plot.vote();
-    });
-
-    // 获取全部死亡的角色的索引
-    const deadCharacterIndex = gameCharacter.value
-      .map((item, index) => {
-        if (item.isKilled || item.isKilledByWitch) {
-          return index;
-        }
-      })
-      .filter((item) => item !== undefined);
-
-    plotText.value = deadCharacterIndex.length
-      ? `昨晚${deadCharacterIndex
-          .map((index) => `玩家${index + 1}`)
-          .join("、")}死亡`
-      : "昨晚是个平安夜";
-  }
-
-  async vote() {
-    // 投票
-    plot.setActionButtonText("投票");
-    plot.setContinueButtonText("不投票，继续下一轮");
-    plot.setTips("请选择要投出的角色");
-    plotText.value = "请投票";
-
-    const isSelect = ref(false);
-
-    plot.setAllCharacterHighlightFunction((character, index) => {
-      return character.isVoted;
-    });
-
-    plot.setAllCharacterButtonDisabledFunction((character, index) => {
-      return (
-        character.isKilled ||
-        character.isKilledByWitch ||
-        character.isDead ||
-        character.isVoted
-      );
-    });
-    plot.setAllCharacterHighlightColor("#429942");
-    plot.handleCharacterState();
-
-    plot.setActionButtonFunction((character, index) => {
-      if (isSelect.value) {
-        gameCharacter.value.forEach((item) => {
-          item.isVoted = false;
-        });
-      }
-      character.isVoted = true;
-      isSelect.value = true;
-      plot.setContinueButtonText("确定");
-    });
-
-    plot.setContinueButtonFunction(() => {
-      plot.day++;
-      plot.judge();
-    });
-
-    // 若全部坏角色都已死亡,则直接跳过投票环节
-    if (badCount.value === 0) {
-      plot.judge();
-    }
-  }
-
-  async judge() {
-    plot.handleCharacterState();
-
-    plot.resetState();
-
-    if (goodCount.value === 0 || badCount.value >= goodCount.value) {
-      plotText.value = "好人阵营失败";
-      plot.setContinueButtonText("再来一轮");
-      plot.setContinueButtonFunction(() => {
-        router.push({ name: "settings" });
-      });
-    } else if (badCount.value === 0) {
-      plotText.value = "好人阵营胜利";
-      plot.setContinueButtonText("再来一轮");
-      plot.setContinueButtonFunction(() => {
-        router.push({ name: "settings" });
-      });
-    } else {
-      plotText.value = "游戏继续";
-      plot.setTips("请点击按钮继续");
-      plot.setContinueButtonText("开始下一轮");
-      plot.setContinueButtonFunction(() => {
-        if (!_isDev) {
-          plot.wolf_open();
-        } else {
-          plot.wolf_kill();
-        }
-      });
+      seer_see();
     }
   }
 }
 
-const plot = new Plots();
+async function witch_close() {
+  playPlotAudio("witch_close");
+  hideAllCharacter();
+  setContinueButtonText("");
+  setTips(TIPS_DEFAULT);
+  await wait(4000);
+  seer_open();
+}
+
+async function seer_open() {
+  if (!gameCharacter.value.some((item) => item.name === "预言家")) {
+    next_day();
+    return;
+  }
+  playPlotAudio("seer_open");
+  setTips(TIPS_DEFAULT);
+  await wait(4500);
+  seer_see();
+}
+
+async function seer_see() {
+  playPlotAudio("seer_see");
+  setContinueButtonText("继续");
+  showAllCharacter();
+  setTips("请选择要查验的角色");
+  setActionButtonText("选择");
+  setContinueButtonDisabled(true);
+
+  const isSelect = ref(false);
+
+  setAllCharacterHighlightFunction((character, index) => {
+    return character.isSelectBySeer;
+  });
+
+  setAllCharacterButtonDisabledFunction((character, index) => {
+    return character.isSelectBySeer || character.isDead;
+  });
+
+  setActionButtonFunction((character, index) => {
+    if (isSelect.value) {
+      gameCharacter.value.forEach((item) => {
+        item.isSelectBySeer = false;
+      });
+    }
+    seerCheckCharacter.value = character;
+    seerCheckCharacterIndex.value = index;
+    character.isSelectBySeer = true;
+    isSelect.value = true;
+    setContinueButtonDisabled(false);
+  });
+
+  setContinueButtonFunction(() => {
+    seer_result();
+  });
+}
+
+async function seer_result() {
+  playPlotAudio("seer_result");
+  setContinueButtonText("继续");
+  hideAllCharacter();
+  setActionButtonText("");
+  setActionButtonFunction(null);
+
+  setSingleCharacterHighlightFunction(() => true);
+  const role = seerCheckCharacter.value.role === "good" ? "好人" : "坏人";
+  const data = {
+    name: role,
+    avatar: UNKNOWN_AVATAR,
+    role: seerCheckCharacter.value.role,
+  };
+  showSingleCharacter(data);
+  setTips(`该角色是${role}`);
+
+  setContinueButtonFunction(() => {
+    if (!_isDev) {
+      seer_close();
+    } else {
+      next_day();
+    }
+  });
+}
+
+async function seer_close() {
+  playPlotAudio("seer_close");
+  hideSingleCharacter();
+  setContinueButtonText("");
+  setTips(TIPS_DEFAULT);
+  await wait(5000);
+  next_day();
+}
+
+async function next_day() {
+  playPlotAudio("next_day");
+  setTips("本轮已结束，请待全部玩家发言完毕后点击按钮继续");
+  setContinueButtonText("前往投票");
+  hideSingleCharacter();
+  showAllCharacter();
+
+  setAllCharacterHighlightFunction((character, index) => {
+    return character.isKilled || character.isKilledByWitch;
+  });
+  setAllCharacterHighlightColor("#c9302c");
+
+  setContinueButtonFunction(() => {
+    vote();
+  });
+
+  // 获取全部死亡的角色的索引
+  const deadCharacterIndex = gameCharacter.value
+    .map((item, index) => {
+      if (item.isKilled || item.isKilledByWitch) {
+        return index;
+      }
+    })
+    .filter((item) => item !== undefined);
+
+  setPlotText(
+    deadCharacterIndex.length
+      ? `昨晚${deadCharacterIndex
+          .map((index) => `玩家${index + 1}`)
+          .join("、")}死亡`
+      : "昨晚是个平安夜"
+  );
+}
+
+async function vote() {
+  // 投票
+  setActionButtonText("投票");
+  setContinueButtonText("不投票，继续下一轮");
+  setTips("请选择要投出的角色");
+  setPlotText("请投票");
+
+  const isSelect = ref(false);
+
+  setAllCharacterHighlightFunction((character, index) => {
+    return character.isVoted;
+  });
+
+  setAllCharacterButtonDisabledFunction((character, index) => {
+    return (
+      character.isKilled ||
+      character.isKilledByWitch ||
+      character.isDead ||
+      character.isVoted
+    );
+  });
+  setAllCharacterHighlightColor("#429942");
+  handleCharacterState();
+
+  setActionButtonFunction((character, index) => {
+    if (isSelect.value) {
+      gameCharacter.value.forEach((item) => {
+        item.isVoted = false;
+      });
+    }
+    character.isVoted = true;
+    isSelect.value = true;
+    setContinueButtonText("确定");
+  });
+
+  setContinueButtonFunction(() => {
+    day.value++;
+    judge();
+  });
+
+  // 若全部坏角色都已死亡,则直接跳过投票环节
+  if (badCount.value === 0) {
+    judge();
+  }
+}
+
+async function judge() {
+  handleCharacterState();
+
+  resetState();
+
+  if (goodCount.value === 0 || badCount.value >= goodCount.value) {
+    setPlotText("好人阵营失败");
+    setContinueButtonText("再来一轮");
+    setContinueButtonFunction(() => {
+      router.push({ name: "settings" });
+    });
+  } else if (badCount.value === 0) {
+    setPlotText("好人阵营胜利");
+    setContinueButtonText("再来一轮");
+    setContinueButtonFunction(() => {
+      router.push({ name: "settings" });
+    });
+  } else {
+    setPlotText("游戏继续");
+    setTips("请点击按钮继续");
+    setContinueButtonText("开始下一轮");
+    setContinueButtonFunction(() => {
+      if (!_isDev) {
+        wolf_open();
+      } else {
+        wolf_kill();
+      }
+    });
+  }
+}
 
 async function wait(time) {
   return new Promise((resolve) => {
@@ -904,8 +902,6 @@ onMounted(() => {
   }
 
   handleGameLoop();
-
-  window.plot = plot;
 });
 </script>
 
