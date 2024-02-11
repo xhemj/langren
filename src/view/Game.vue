@@ -161,7 +161,7 @@
         <template #header>
           <h3 class="font-bold text-lg">调试信息</h3>
         </template>
-        <GamePanel :game-character="gameCharacter" />
+        <GamePanel :game-character="gameCharacter" :plot-data="plotData" />
       </n-drawer-content>
     </n-drawer>
   </div>
@@ -184,7 +184,7 @@ const GamePanel = defineAsyncComponent(() =>
 const router = useRouter();
 const game = useGameStore();
 const audioController = useAudioController();
-const _isDev = false; // import.meta.env.DEV;
+const _isDev = import.meta.env.DEV;
 
 const gameCharacter = ref(
   game.playerIdentity.map((character) => {
@@ -296,6 +296,23 @@ const seerCheckCharacterIndex = ref(null);
  * 第几天
  */
 const day = ref(1);
+
+/**
+ * 剧情数据
+ */
+const plotData = computed(() => {
+  return {
+    wolfKilledCharacter,
+    wolfKilledCharacterIndex,
+    witchIsUsedPoison,
+    witchIsUsedMedicine,
+    witchKilledCharacter,
+    witchKilledCharacterIndex,
+    seerCheckCharacter,
+    seerCheckCharacterIndex,
+    day,
+  };
+});
 
 /**
  * 播放剧情音频

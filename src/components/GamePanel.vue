@@ -12,22 +12,17 @@
     </div>
   </div>
   <div v-else class="w-full flex flex-col">
-    <h3 class="font-bold text-lg">玩家信息</h3>
+    <h3 class="font-bold text-lg">游戏信息</h3>
+    <p class="text-base">游戏天数：第 {{ plotData.day }} 天</p>
+
+    <h3 class="font-bold text-lg mt-4">玩家信息</h3>
     <n-data-table
       :columns="columns"
       :data="data"
       :bordered="false"
       :striped="true"
+      :scrollbar-props="{ 'x-scrollable': true }"
     />
-
-    <!-- <h3 class="font-bold text-lg mt-4">游戏信息</h3>
-    <p class="text-base">游戏天数：第 {{ plot.day }} 天</p>
-    <p class="text-base">
-      女巫解药状态：{{ plot.witchIsUsedMedicine ? "已使用" : "未使用" }}
-    </p>
-    <p class="text-base">
-      女巫毒药状态：{{ plot.witchIsUsedPoison ? "已使用" : "未使用" }}
-    </p> -->
 
     <h3 class="font-bold text-lg mt-4">构建信息</h3>
     <p class="text-base">构建时间：{{ new Date(now).toLocaleString() }}</p>
@@ -49,6 +44,10 @@ import { useGameStore } from "../stores/game";
 
 const props = defineProps({
   gameCharacter: {
+    type: Object,
+    required: true,
+  },
+  plotData: {
     type: Object,
     required: true,
   },
@@ -81,11 +80,24 @@ const computedCharacterStatus = (character) => {
   return status.join("，");
 };
 
+const computedRemark = (character) => {
+  const remark = [];
+  const name = character.name;
+  if (name === "女巫" && props.plotData.witchIsUsedMedicine.value) {
+    remark.push("已使用解药");
+  }
+  if (name === "女巫" && props.plotData.witchIsUsedPoison.value) {
+    remark.push("已使用毒药");
+  }
+  return remark.join("，");
+};
+
 props.gameCharacter.forEach((character, index) => {
   data.value.push({
     index: `玩家${index + 1}`,
     name: character.name,
     status: computedCharacterStatus(character),
+    remark: computedRemark(character),
   });
 });
 
@@ -101,6 +113,10 @@ const columns = ref([
   {
     title: "状态",
     key: "status",
+  },
+  {
+    title: "备注",
+    key: "remark",
   },
 ]);
 
