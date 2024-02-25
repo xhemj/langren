@@ -16,6 +16,12 @@ const routes = [
     meta: { level: 2 },
   },
   {
+    path: "/manual",
+    component: () => import("../view/ManualMode.vue"),
+    name: "manual",
+    meta: { level: 2 },
+  },
+  {
     path: "/game",
     component: () => import("../view/Game.vue"),
     name: "game",

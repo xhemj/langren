@@ -2,7 +2,7 @@
   <div v-if="!game.isConfirmOpenDevPanel" class="w-full">
     <p class="font-medium text-base">
       在游戏中查看调试信息会<span class="text-red-500">严重影响</span
-      >游戏体验，非开发人员不建议查看。
+      >游戏体验，非开发人员请不要查看。
     </p>
     <p class="font-medium text-base">确定要查看调试信息吗？</p>
     <div class="mt-4">
