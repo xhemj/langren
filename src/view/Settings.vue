@@ -1,6 +1,8 @@
 <template>
-  <div id="page">
-    <div class="flex flex-col h-full">
+  <div id="page" class="!p-0">
+    <div
+      class="flex flex-col h-full absolute left-0 right-0 top-0 bottom-0 px-4 py-2"
+    >
       <h2 class="font-bold text-2xl text-center mb-2">狼人杀语音助手</h2>
       <div class="flex w-full flex-row">
         <p class="font-medium text-base">游玩人数：</p>
@@ -27,45 +29,47 @@
         >
       </p>
 
-      <div class="flex w-full flex-row flex-wrap mt-1 pr-2">
-        <div
-          v-for="character in characters"
-          class="w-1/2 p-1"
-          :key="character.name"
-        >
-          <CharacterCard
-            :character="character"
-            :highlight="Boolean(game.characterList[character.name])"
+      <n-scrollbar class="flex-1" trigger="none">
+        <div class="flex w-full flex-row flex-wrap mt-1 pr-2">
+          <div
+            v-for="character in characters"
+            class="w-1/2 p-1"
+            :key="character.name"
           >
-            <template #action>
-              <div class="text-center">
-                <n-button
-                  size="small"
-                  tertiary
-                  circle
-                  type="error"
-                  @click="onRemoveCharacter(character)"
-                  :disabled="!game.characterList[character.name]"
-                >
-                  <Icon><Subtract20Filled /></Icon>
-                </n-button>
-                <span class="mx-2 font-bold text-sm align-text-bottom">
-                  {{ game.characterList[character.name] || 0 }}
-                </span>
-                <n-button
-                  size="small"
-                  tertiary
-                  circle
-                  type="info"
-                  @click="onSelectCharacter(character)"
-                >
-                  <Icon><Add20Filled /></Icon>
-                </n-button>
-              </div>
-            </template>
-          </CharacterCard>
+            <CharacterCard
+              :character="character"
+              :highlight="Boolean(game.characterList[character.name])"
+            >
+              <template #action>
+                <div class="text-center">
+                  <n-button
+                    size="small"
+                    tertiary
+                    circle
+                    type="error"
+                    @click="onRemoveCharacter(character)"
+                    :disabled="!game.characterList[character.name]"
+                  >
+                    <Icon><Subtract20Filled /></Icon>
+                  </n-button>
+                  <span class="mx-2 font-bold text-sm align-text-bottom">
+                    {{ game.characterList[character.name] || 0 }}
+                  </span>
+                  <n-button
+                    size="small"
+                    tertiary
+                    circle
+                    type="info"
+                    @click="onSelectCharacter(character)"
+                  >
+                    <Icon><Add20Filled /></Icon>
+                  </n-button>
+                </div>
+              </template>
+            </CharacterCard>
+          </div>
         </div>
-      </div>
+      </n-scrollbar>
 
       <div class="flex justify-center flex-col items-center mt-2">
         <p
@@ -77,7 +81,7 @@
         >
           {{ isFinishSelected ? "已选择完成" : "选择角色的数量不匹配" }}
         </p>
-        <div class="w-full space-y-2">
+        <div class="w-full">
           <n-button
             type="primary"
             size="large"
@@ -87,23 +91,29 @@
           >
             开始游戏
           </n-button>
-          <n-button size="large" block secondary @click="onManualMode">
+          <n-button
+            size="large"
+            block
+            quaternary
+            type="primary"
+            @click="onManualMode"
+          >
             手动控制模式
           </n-button>
         </div>
       </div>
-      <div class="w-full text-center text-xs text-gray-400 mt-2">
+      <div class="w-full text-center text-xs text-gray-400 mt-1">
         <p class="space-x-1">
           <span>狼人杀语音助手</span>
           <span class="border-b border-dashed border-gray-400">
             {{ new Date(now).toLocaleDateString() }}
           </span>
           <span> - </span>
-          <span class="border-b border-dashed border-gray-400">
+          <!-- <span class="border-b border-dashed border-gray-400">
             {{ commitSha }}
-          </span>
+          </span> -->
+          <span>&copy; {{ new Date().getFullYear() }} Xhemj</span>
         </p>
-        <p>&copy; {{ new Date().getFullYear() }} Xhemj</p>
       </div>
     </div>
   </div>
